@@ -35,6 +35,10 @@ class ViewController: UIViewController {
         }
     }
     
+    func convertMileToKM(_ distance: Double) -> Double{
+        return distance * 1.609
+    }
+    
     func getHeartRate(completion: @escaping ([HKSample]) -> Void){
         guard let sampleType = HKObjectType.quantityType(forIdentifier: .heartRate) else {
             return
@@ -88,7 +92,30 @@ class ViewController: UIViewController {
         healthStore.execute(query)
     }
     
-    
+    func getDistanceWalkingRunning(completion: @escaping (Double) -> Void){
+        guard let distanceWalkingRunningType = HKSampleType.quantityType(forIdentifier: .distanceWalkingRunning) else {
+            return
+        }
+        
+        let now = Date()
+        let startDate = Calendar.current.startOfDay(for: now)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: now, options: .strictEndDate)
+        
+        let query = HKStatisticsQuery(quantityType: distanceWalkingRunningType, quantitySamplePredicate: predicate,options:.cumulativeSum) { _, result, error in
+            var distance: Double = 0
+            
+            guard let result = result, let sum = result.sumQuantity() else {
+                print("fail")
+                return
+            }
+            distance = sum.doubleValue(for: HKUnit.mile())
+            DispatchQueue.main.async{
+                completion(self.convertMileToKM(distance))
+            }
+        }
+        
+        healthStore.execute(query)
+    }
 
 
 }
