@@ -116,6 +116,29 @@ class ViewController: UIViewController {
         
         healthStore.execute(query)
     }
+    
+    func getActivityEnergyBurned(completion: @escaping (Double) -> Void){
+        guard let activeEnergyBurnedType = HKSampleType.quantityType(forIdentifier: .activeEnergyBurned) else {
+            return
+        }
+        
+        let now = Date()
+        let startDate = Calendar.current.startOfDay(for: now)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: now, options: .strictEndDate)
+        
+        let query = HKStatisticsQuery(quantityType: activeEnergyBurnedType, quantitySamplePredicate: predicate, options:.cumulativeSum) { _, result, error in
+            var calorie: Double = 0
+            
+            guard let result = result, let sum = result.sumQuantity() else {return}
+            
+            calorie = sum.doubleValue(for: HKUnit.kilocalorie())
+            DispatchQueue.main.async {
+                completion(calorie)
+            }
+        }
+        
+        healthStore.execute(query)
+    }
 
 
 }
