@@ -63,6 +63,32 @@ class ViewController: UIViewController {
         
         healthStore.execute(query)
     }
+    
+    func getStepCount(completion: @escaping (Double) -> Void){
+        guard let stepQuantityType = HKQuantityType.quantityType(forIdentifier: .stepCount)else {
+            return
+        }
+        
+        let now = Date()
+        let startDate = Calendar.current.startOfDay(for: now)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: now, options: .strictEndDate)
+        
+        let query = HKStatisticsQuery(quantityType: stepQuantityType, quantitySamplePredicate: predicate) { _, result, error in
+            guard let result = result, let sum = result.sumQuantity() else {
+                print("fail")
+                return
+            }
+            
+            DispatchQueue.main.async{
+                completion(sum.doubleValue(for: HKUnit.count()))
+                
+            }
+        }
+        
+        healthStore.execute(query)
+    }
+    
+    
 
 
 }
