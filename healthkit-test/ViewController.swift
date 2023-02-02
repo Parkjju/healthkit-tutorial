@@ -14,6 +14,11 @@ class ViewController: UIViewController {
     let read = Set([HKObjectType.quantityType(forIdentifier: .heartRate)!, HKObjectType.quantityType(forIdentifier: .stepCount)!, HKSampleType.quantityType(forIdentifier: .distanceWalkingRunning)!, HKSampleType.quantityType(forIdentifier: .activeEnergyBurned)!])
     let share = Set([HKObjectType.quantityType(forIdentifier: .heartRate)!, HKObjectType.quantityType(forIdentifier: .stepCount)!, HKSampleType.quantityType(forIdentifier: .distanceWalkingRunning)!, HKSampleType.quantityType(forIdentifier: .activeEnergyBurned)!])
     
+    @IBOutlet weak var dataLabel: UILabel!
+    
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -134,12 +139,42 @@ class ViewController: UIViewController {
             calorie = sum.doubleValue(for: HKUnit.kilocalorie())
             DispatchQueue.main.async {
                 completion(calorie)
+                print("cal: ",calorie)
             }
         }
         
         healthStore.execute(query)
     }
-
+    
+    
+    @IBAction func heartRateButtonTapped(_ sender: UIButton) {
+        
+        getHeartRate { sample in
+            print(sample)
+        }
+        
+    }
+    
+    @IBAction func stepCountButtonTapped(_ sender: UIButton) {
+        getStepCount { step in
+            self.dataLabel.text = "\(Int(step))걸음을 걸었어요 💪"
+        }
+    }
+    
+    
+    @IBAction func walkingDistanceButtonTapped(_ sender: UIButton) {
+        getDistanceWalkingRunning { data in
+            self.dataLabel.text = "\(Int(data))km를 걸었어요 🏃"
+        }
+    }
+    
+    @IBAction func energyBurnedButtonTapped(_ sender: UIButton) {
+        print("tapped!")
+        getActivityEnergyBurned { data in
+            self.dataLabel.text = "\(Int(data)) kcal를 소모했어요 🔥"
+        }
+    }
+    
 
 }
 
